@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZOCHA 新聞情報看板</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grad-start: #4ECDC4;
+    --grad-end:   #0099CC;
+    --bg:         #FFFFFF;
+    --surface:    #F7F9FA;
+    --navy:       #2E3A59;
+    --midnight:   #102A43;
+    --slate:      #455A64;
+    --muted:      #90A4AE;
+    --border:     #E8EDF2;
+    --pill-r:     999px;
+    --card-r:     20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--slate);
+    font-family: 'Noto Sans TC', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 32px 28px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── 背景弧線裝飾 ── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -120px; right: -160px;
+    width: 520px; height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(78,205,196,.10) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -100px; left: -120px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,153,204,.08) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── GRADIENT UTILITIES ── */
+  .grad-text {
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .grad-bg {
+    background: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-end) 100%);
+  }
+  .grad-border {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    position: relative; z-index: 1;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 22px;
+    border-radius: var(--pill-r);
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    box-shadow: 0 8px 24px rgba(78,205,196,.30);
+  }
+  .logo-pill span {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; font-size: 18px; color: #fff;
+    letter-spacing: 2px;
+  }
+  .logo-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.6); }
+
+  .header-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; font-size: 24px; color: var(--midnight);
+    letter-spacing: .5px;
+  }
+  .header-sub {
+    font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: .3px;
+  }
+
+  .badge-live {
+    display: flex; align-items: center; gap: 8px;
+    border-radius: var(--pill-r);
+    padding: 8px 18px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    font-size: 13px; font-weight: 600; color: var(--navy);
+  }
+  .dot-live {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(78,205,196,.5); }
+    50%      { box-shadow: 0 0 0 6px rgba(78,205,196,.0); }
+  }
+
+  /* ── STAT ROW ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+    position: relative; z-index: 1;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border-radius: var(--card-r);
+    border: 1.5px solid var(--border);
+    padding: 20px 16px 16px;
+    text-align: center;
+    transition: transform .22s, box-shadow .22s;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--card-r) var(--card-r) 0 0;
+    background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+    opacity: 0; transition: opacity .22s;
+  }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,153,204,.10); }
+  .stat-card:hover::after { opacity: 1; }
+  .stat-card.inactive::after { display: none; }
+
+  .stat-icon { font-size: 26px; margin-bottom: 10px; }
+  .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 6px; letter-spacing: .5px; }
+  .stat-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 36px; font-weight: 800; line-height: 1;
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .stat-num.zero {
+    background: none; -webkit-text-fill-color: var(--border);
+  }
+  .stat-pill {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; padding: 3px 12px;
+    border-radius: var(--pill-r);
+  }
+  .pill-active { background: rgba(78,205,196,.12); color: var(--grad-start); }
+  .pill-empty  { background: var(--border); color: var(--muted); }
+
+  /* ── MAIN GRID ── */
+  .grid-main {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    position: relative; z-index: 1;
+  }
+  .left-col  { display: flex; flex-direction: column; gap: 20px; }
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── CATEGORY CARD ── */
+  .cat-card {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 22px;
+    transition: box-shadow .2s;
+  }
+  .cat-card:hover { box-shadow: 0 8px 28px rgba(0,153,204,.07); }
+
+  .cat-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+  }
+  .cat-icon-wrap {
+    width: 42px; height: 42px; border-radius: 14px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    background: linear-gradient(135deg, rgba(78,205,196,.15), rgba(0,153,204,.10));
+  }
+  .cat-title-block { flex: 1; }
+  .cat-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px; font-weight: 700; color: var(--midnight);
+  }
+  .cat-keywords { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .count-chip {
+    font-size: 12px; font-weight: 700; padding: 4px 14px;
+    border-radius: var(--pill-r);
+  }
+  .chip-active {
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    color: #fff; box-shadow: 0 4px 12px rgba(78,205,196,.3);
+  }
+  .chip-zero { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 28px 0;
+    background: var(--surface); border-radius: 14px;
+  }
+  .empty-icon { font-size: 30px; margin-bottom: 8px; }
+  .empty-text { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+  /* ── NEWS LIST ── */
+  .news-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .news-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 14px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1.5px solid transparent;
+    text-decoration: none;
+    transition: border-color .2s, background .2s, transform .15s;
+    cursor: pointer;
+  }
+  .news-item:hover {
+    border-color: var(--grad-start);
+    background: rgba(78,205,196,.04);
+    transform: translateX(3px);
+  }
+
+  .news-rank {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 800;
+    min-width: 22px; text-align: center; padding-top: 1px;
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .news-body { flex: 1; min-width: 0; }
+  .news-title {
+    font-size: 13px; font-weight: 600; color: var(--midnight);
+    line-height: 1.55; margin-bottom: 6px;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .news-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .news-source {
+    font-size: 11px; color: var(--slate);
+    background: rgba(46,58,89,.08);
+    padding: 2px 8px; border-radius: var(--pill-r); font-weight: 500;
+  }
+  .news-time { font-size: 11px; color: var(--muted); }
+  .news-arrow { color: var(--muted); font-size: 16px; padding-top: 1px; transition: color .2s; }
+  .news-item:hover .news-arrow { color: var(--grad-end); }
+
+  /* ── TRENDS PANEL ── */
+  .trends-panel {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 22px;
+    position: sticky; top: 24px;
+  }
+
+  .trends-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .trends-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px; font-weight: 800; color: var(--midnight);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .trends-chip {
+    font-size: 11px; font-weight: 700; padding: 4px 12px;
+    border-radius: var(--pill-r);
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    color: #fff;
+  }
+  .trends-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; letter-spacing: .3px; }
+
+  /* divider */
+  .divider {
+    height: 1px; background: var(--border); margin: 4px 0 12px;
+  }
+
+  .trend-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--surface);
+  }
+  .trend-item:last-child { border-bottom: none; }
+
+  .trend-rank {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 800;
+    min-width: 22px; text-align: center;
+  }
+  .r1 { font-size: 14px; background: linear-gradient(135deg,#f7b733,#fc4a1a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .r2 { color: #90A4AE; }
+  .r3 { color: #A0836E; }
+  .rn { color: var(--muted); }
+
+  .trend-info { flex: 1; min-width: 0; }
+  .trend-top-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .trend-kw {
+    font-size: 13px; font-weight: 600; color: var(--midnight);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  .trend-vol { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  .trend-bar-bg {
+    height: 5px; background: var(--surface); border-radius: var(--pill-r);
+    overflow: hidden;
+  }
+  .trend-bar-fill {
+    height: 100%; border-radius: var(--pill-r);
+    background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+  }
+
+  .ttag {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: var(--pill-r); white-space: nowrap; flex-shrink: 0;
+  }
+  .t-fin  { background:rgba(78,205,196,.12); color:#0099CC; }
+  .t-cel  { background:rgba(255,152,0,.12);  color:#F57C00; }
+  .t-tec  { background:rgba(63,81,181,.12);  color:#3F51B5; }
+  .t-soc  { background:rgba(229,57,53,.10);  color:#E53935; }
+  .t-int  { background:rgba(46,58,89,.10);   color:#2E3A59; }
+  .t-spt  { background:rgba(56,142,60,.12);  color:#388E3C; }
+  .t-wx   { background:rgba(2,136,209,.10);  color:#0288D1; }
+  .t-auto { background:rgba(109,76,65,.10);  color:#6D4C41; }
+  .t-pol  { background:rgba(123,31,162,.10); color:#7B1FA2; }
+  .t-ent  { background:rgba(255,64,129,.12); color:#FF4081; }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1.5px solid var(--border);
+    text-align: center;
+    font-size: 12px; color: var(--muted); letter-spacing: .3px;
+    position: relative; z-index: 1;
+  }
+  .footer span {
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; font-weight: 700;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .grid-main { grid-template-columns: 1fr; }
+    .stat-row  { grid-template-columns: repeat(3,1fr); }
+    .trends-panel { position: static; }
+  }
+  @media (max-width: 640px) {
+    .stat-row  { grid-template-columns: repeat(2,1fr); }
+    body { padding: 16px; }
+    .header-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-pill">
+      <div class="logo-dot"></div>
+      <span>ZOCHA</span>
+    </div>
+    <div>
+      <div class="header-title">新聞情報看板</div>
+      <div class="header-sub">Taiwan News Intelligence Dashboard &nbsp;·&nbsp; 2026-04-15</div>
+    </div>
+  </div>
+  <div class="badge-live">
+    <div class="dot-live"></div>
+    即時資訊
+  </div>
+</header>
+
+<!-- ═══════════════ STAT ROW ═══════════════ -->
+<div class="stat-row">
+  <div class="stat-card inactive">
+    <div class="stat-icon">🏖️</div>
+    <div class="stat-label">台灣旅遊</div>
+    <div class="stat-num zero">0</div>
+    <div class="stat-pill pill-empty">本週無新聞</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📋</div>
+    <div class="stat-label">補助政策</div>
+    <div class="stat-num">5</div>
+    <div class="stat-pill pill-active">有新消息</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🛵</div>
+    <div class="stat-label">機車服務</div>
+    <div class="stat-num">5</div>
+    <div class="stat-pill pill-active">有新消息</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🎵</div>
+    <div class="stat-label">藝文活動</div>
+    <div class="stat-num">5</div>
+    <div class="stat-pill pill-active">有新消息</div>
+  </div>
+  <div class="stat-card inactive">
+    <div class="stat-icon">🏷️</div>
+    <div class="stat-label">品牌關鍵字</div>
+    <div class="stat-num zero">0</div>
+    <div class="stat-pill pill-empty">本週無新聞</div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN GRID ═══════════════ -->
+<div class="grid-main">
+
+  <!-- ── LEFT COL ── -->
+  <div class="left-col">
+
+    <!-- 台灣旅遊 -->
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-icon-wrap">🏖️</div>
+        <div class="cat-title-block">
+          <div class="cat-title">台灣旅遊</div>
+          <div class="cat-keywords">住宿優惠 · 鐵道旅遊 · 連假 · 訂房率</div>
+        </div>
+        <div class="count-chip chip-zero">0 則</div>
+      </div>
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text">近一週內無相關新聞</div>
+      </div>
+    </div>
+
+    <!-- 補助政策 -->
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-icon-wrap">📋</div>
+        <div class="cat-title-block">
+          <div class="cat-title">補助政策</div>
+          <div class="cat-keywords">交通部觀光署 · 觀光局 · 國旅補助</div>
+        </div>
+        <div class="count-chip chip-active">5 則</div>
+      </div>
+      <div class="news-list">
+        <a class="news-item" href="https://www.msn.com/zh-tw/news/living/%E5%9C%8B%E6%97%85%E8%A3%9C%E5%8A%A9%E6%81%90%E8%B7%B3%E7%A5%A8-%E7%94%9F%E6%97%A5%E5%88%B8-%E4%BD%8F%E5%AE%BF%E9%87%91-%E7%88%86%E5%96%8A%E5%8D%A1-%E8%A7%80%E5%85%89%E7%BD%B2%E6%80%A5%E7%99%BC%E8%81%B2%E6%9B%9D%E7%9C%9F%E7%9B%B8/ar-AA1ZhACa" target="_blank">
+          <div class="news-rank">1</div>
+          <div class="news-body">
+            <div class="news-title">國旅補助恐跳票？「生日券、住宿金」爆喊卡，觀光署急發聲曝真相</div>
+            <div class="news-meta"><span class="news-source">MSN</span><span class="news-time">🕐 8 小時前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.gvm.com.tw/article/128767" target="_blank">
+          <div class="news-rank">2</div>
+          <div class="news-body">
+            <div class="news-title">2026國旅補助，這縣市先跑快來搶！地方加碼最高1萬元，申請條件一次看</div>
+            <div class="news-meta"><span class="news-source">遠見雜誌</span><span class="news-time">🕐 2 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.businesstoday.com.tw/article/category/183030/post/202603230025/" target="_blank">
+          <div class="news-rank">3</div>
+          <div class="news-body">
+            <div class="news-title">2026國旅補助／住宿補貼能領3200元、縣市加碼最高1萬！生日抽住宿金懶人包</div>
+            <div class="news-meta"><span class="news-source">今周刊</span><span class="news-time">🕐 2 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.harpersbazaar.com/tw/life/trips/a71009703/2026-travel-subsidy/" target="_blank">
+          <div class="news-rank">4</div>
+          <div class="news-body">
+            <div class="news-title">2026國旅補助怎麼申請？五大補助、登記資格懶人包：最高可領3200元</div>
+            <div class="news-meta"><span class="news-source">Harper's BAZAAR</span><span class="news-time">🕐 1 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.taiwan.net.tw/m1.aspx?sNo=0044377" target="_blank">
+          <div class="news-rank">5</div>
+          <div class="news-body">
+            <div class="news-title">觀光署率團進軍河內VITM旅展，攜手越南代言人ISAAC大秀台灣魅力</div>
+            <div class="news-meta"><span class="news-source">交通部觀光署</span><span class="news-time">🕐 1 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 機車服務 -->
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-icon-wrap">🛵</div>
+        <div class="cat-title-block">
+          <div class="cat-title">機車服務</div>
+          <div class="cat-keywords">機車族 · 交通新法 · 道路交通管理處罰條例 · 機車駕照 · 租機車</div>
+        </div>
+        <div class="count-chip chip-active">5 則</div>
+      </div>
+      <div class="news-list">
+        <a class="news-item" href="https://www.storm.mg/lifestyle/11121347" target="_blank">
+          <div class="news-rank">1</div>
+          <div class="news-body">
+            <div class="news-title">「有冷氣、充電座，機車族不用淋雨了」！駕艙機車Lean3內裝亮相，電動三輪車路權與駕照一次看</div>
+            <div class="news-meta"><span class="news-source">風傳媒</span><span class="news-time">🕐 6 小時前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.msn.com/zh-tw/news/living/%E8%B7%AF%E9%82%8A%E5%81%9C%E8%BB%8A%E6%96%B0%E5%88%B64%E6%9C%88%E4%B8%8A%E8%B7%AF-%E6%A9%9F%E8%BB%8A%E6%97%8F%E5%A4%A7%E5%82%BB%E7%9C%BC-%E6%9B%B4%E9%9B%A3%E6%89%BE%E8%BB%8A%E4%BD%8D/ar-AA1ZkKj1" target="_blank">
+          <div class="news-rank">2</div>
+          <div class="news-body">
+            <div class="news-title">路邊停車新制4月上路，機車族大傻眼：更難找車位（桃園試辦大型重機斜停2格收1格費）</div>
+            <div class="news-meta"><span class="news-source">MSN</span><span class="news-time">🕐 1 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://autos.yahoo.com.tw/news/%E5%AF%A9%E8%A8%88%E9%83%A8%E8%A6%BA%E5%BE%97%E5%8F%B0%E7%81%A3%E6%A9%9F%E8%BB%8A%E9%A7%95%E7%85%A7%E5%A4%AA%E5%A5%BD%E8%80%83-%E6%97%A5%E6%9C%AC%E5%B9%B3%E5%9D%87%E8%80%8315%E6%AC%A1%E5%9C%8B%E4%BA%BA%E5%8F%AA%E6%9C%895-%E4%B8%8A%E9%A7%95%E8%A8%93%E7%8F%AD-000000558.html" target="_blank">
+          <div class="news-rank">3</div>
+          <div class="news-body">
+            <div class="news-title">審計部覺得台灣機車駕照太好考！日本平均考15次，國人只有5%上駕訓班</div>
+            <div class="news-meta"><span class="news-source">Yahoo奇摩汽車</span><span class="news-time">🕐 2 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.ftvnews.com.tw/news/detail/2026410U11M1" target="_blank">
+          <div class="news-rank">4</div>
+          <div class="news-body">
+            <div class="news-title">一位難求！考機車駕照像演唱會搶票，屏東考生搶破頭（一天僅50名額）</div>
+            <div class="news-meta"><span class="news-source">民視</span><span class="news-time">🕐 5 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://ocacnews.net/article/424000" target="_blank">
+          <div class="news-rank">5</div>
+          <div class="news-body">
+            <div class="news-title">機車闖桃機停放一航廈入境接機處，航警局將依道路交通管理處罰條例開單</div>
+            <div class="news-meta"><span class="news-source">僑委會</span><span class="news-time">🕐 6 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 藝文活動 -->
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-icon-wrap">🎵</div>
+        <div class="cat-title-block">
+          <div class="cat-title">藝文活動</div>
+          <div class="cat-keywords">演唱會 · 音樂祭</div>
+        </div>
+        <div class="count-chip chip-active">5 則</div>
+      </div>
+      <div class="news-list">
+        <a class="news-item" href="https://news.tvbs.com.tw/entertainment/3178606" target="_blank">
+          <div class="news-rank">1</div>
+          <div class="news-body">
+            <div class="news-title">The Kid LAROI台灣演唱會2026｜7/3 Zepp New Taipei，門票4/17正式開賣攻略</div>
+            <div class="news-meta"><span class="news-source">TVBS</span><span class="news-time">🕐 8 小時前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.businessweekly.com.tw/style/blog/3019879" target="_blank">
+          <div class="news-rank">2</div>
+          <div class="news-body">
+            <div class="news-title">2026演唱會全攻略！蔡依林、五月天、TWICE攻蛋，時間表與搶票資訊總整理</div>
+            <div class="news-meta"><span class="news-source">商業周刊</span><span class="news-time">🕐 2 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://tw.news.yahoo.com/2026%E9%9F%93%E5%A5%B3%E5%9C%98%E3%80%81%E5%A5%B3%E6%AD%8C%E6%89%8B%E5%8F%B0%E7%81%A3%E6%BC%94%E5%94%B1%E6%9C%83%E8%B3%87%E8%A8%8A%EF%BC%81exid%E3%80%81yena%E3%80%81ive%E3%80%81mamamoo%E3%80%81nmixx%E4%B8%8D%E6%96%B7%E6%9B%B4%E6%96%B0-131244196.html" target="_blank">
+          <div class="news-rank">3</div>
+          <div class="news-body">
+            <div class="news-title">2026韓女團台灣演唱會！EXID、IVE、MAMAMOO、NMIXX 持續更新</div>
+            <div class="news-meta"><span class="news-source">Yahoo新聞</span><span class="news-time">🕐 1 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://tw.news.yahoo.com/2026%E6%BC%94%E5%94%B1%E6%9C%83%E8%B3%87%E8%A8%8A%E5%94%AE%E7%A5%A8%E6%97%A5%E6%9C%9F%E4%B8%80%E6%AC%A1%E7%9C%8B%EF%BC%81%E4%B8%81%E5%99%B9%E3%80%81official%E9%AB%AD%E7%94%B7dism%E3%80%81exid%E3%80%81cnblue%EF%BC%88%E6%8C%81%E7%BA%8C%E6%9B%B4%E6%96%B0%EF%BC%89-015243601.html" target="_blank">
+          <div class="news-rank">4</div>
+          <div class="news-body">
+            <div class="news-title">2026演唱會售票日期一次看！丁噹、Official髭男dism、EXID、CNBLUE（持續更新）</div>
+            <div class="news-meta"><span class="news-source">Yahoo新聞</span><span class="news-time">🕐 2 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+        <a class="news-item" href="https://www.businesstoday.com.tw/article/category/183030/post/202601290034/" target="_blank">
+          <div class="news-rank">5</div>
+          <div class="news-body">
+            <div class="news-title">2026演唱會懶人包！鄧紫棋、BTS、EXO都來台開唱，大巨蛋售票與時間攻略</div>
+            <div class="news-meta"><span class="news-source">今周刊</span><span class="news-time">🕐 2 天前</span></div>
+          </div>
+          <div class="news-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 品牌關鍵字 -->
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-icon-wrap">🏷️</div>
+        <div class="cat-title-block">
+          <div class="cat-title">品牌關鍵字</div>
+          <div class="cat-keywords">ZOCHA · 摩拓旅程 · Mofun</div>
+        </div>
+        <div class="count-chip chip-zero">0 則</div>
+      </div>
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text">近一週內無相關新聞</div>
+      </div>
+    </div>
+
+  </div><!-- /left-col -->
+
+  <!-- ── RIGHT COL: TRENDS ── -->
+  <div class="right-col">
+    <div class="trends-panel">
+      <div class="trends-top">
+        <div class="trends-title">🔥 Google Trends</div>
+        <div class="trends-chip">台灣 · 24H</div>
+      </div>
+      <div class="trends-sub">熱搜前 20 名 &nbsp;·&nbsp; 2026-04-15 更新</div>
+      <div class="divider"></div>
+
+      <!-- 1 -->
+      <div class="trend-item">
+        <div class="trend-rank r1">1</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">財政部</span>
+            <span class="ttag t-fin">財經</span>
+          </div>
+          <div class="trend-vol">100,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+      <!-- 2 -->
+      <div class="trend-item">
+        <div class="trend-rank r2">2</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">稅</span>
+            <span class="ttag t-fin">財經</span>
+          </div>
+          <div class="trend-vol">50,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:50%"></div></div>
+        </div>
+      </div>
+      <!-- 3 -->
+      <div class="trend-item">
+        <div class="trend-rank r3">3</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">柯震東</span>
+            <span class="ttag t-cel">娛樂</span>
+          </div>
+          <div class="trend-vol">20,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:20%"></div></div>
+        </div>
+      </div>
+      <!-- 4 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">4</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">印刷電路板</span>
+            <span class="ttag t-tec">科技</span>
+          </div>
+          <div class="trend-vol">10,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:10%"></div></div>
+        </div>
+      </div>
+      <!-- 5 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">5</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">南韓 伊朗</span>
+            <span class="ttag t-int">國際</span>
+          </div>
+          <div class="trend-vol">10,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:10%"></div></div>
+        </div>
+      </div>
+      <!-- 6 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">6</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">農藥</span>
+            <span class="ttag t-soc">社會</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 7 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">7</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">債券</span>
+            <span class="ttag t-fin">財經</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 8 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">8</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">閃兵</span>
+            <span class="ttag t-soc">社會</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 9 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">9</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">澎恰恰</span>
+            <span class="ttag t-cel">娛樂</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 10 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">10</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">賴苡任</span>
+            <span class="ttag t-ent">藝人</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 11 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">11</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">鄭浩均</span>
+            <span class="ttag t-soc">社會</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 12 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">12</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">德尼·阿夫迪亞</span>
+            <span class="ttag t-spt">體育</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 13 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">13</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">Apple Watch</span>
+            <span class="ttag t-tec">科技</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 14 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">14</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">國巨法說會</span>
+            <span class="ttag t-fin">財經</span>
+          </div>
+          <div class="trend-vol">5,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:5%"></div></div>
+        </div>
+      </div>
+      <!-- 15 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">15</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">聖嬰現象</span>
+            <span class="ttag t-wx">氣象</span>
+          </div>
+          <div class="trend-vol">2,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:2%"></div></div>
+        </div>
+      </div>
+      <!-- 16 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">16</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">預算</span>
+            <span class="ttag t-pol">政治</span>
+          </div>
+          <div class="trend-vol">2,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:2%"></div></div>
+        </div>
+      </div>
+      <!-- 17 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">17</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">中鋼</span>
+            <span class="ttag t-fin">財經</span>
+          </div>
+          <div class="trend-vol">2,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:2%"></div></div>
+        </div>
+      </div>
+      <!-- 18 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">18</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">張錫銘</span>
+            <span class="ttag t-soc">社會</span>
+          </div>
+          <div class="trend-vol">2,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:2%"></div></div>
+        </div>
+      </div>
+      <!-- 19 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">19</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">疲老闆</span>
+            <span class="ttag t-cel">娛樂</span>
+          </div>
+          <div class="trend-vol">2,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:2%"></div></div>
+        </div>
+      </div>
+      <!-- 20 -->
+      <div class="trend-item">
+        <div class="trend-rank rn">20</div>
+        <div class="trend-info">
+          <div class="trend-top-row">
+            <span class="trend-kw">日產 X-Trail</span>
+            <span class="ttag t-auto">汽車</span>
+          </div>
+          <div class="trend-vol">1,000+</div>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:1%"></div></div>
+        </div>
+      </div>
+
+    </div><!-- /trends-panel -->
+  </div><!-- /right-col -->
+
+</div><!-- /grid-main -->
+
+<div class="footer">
+  資料來源：Google News &nbsp;·&nbsp; Google Trends Taiwan &nbsp;·&nbsp; Firecrawl
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  更新時間：2026-04-15
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <span>ZOCHA</span> Intelligence Dashboard
+</div>
+
+</body>
+</html>
