@@ -1,16 +1,25 @@
 {
-  "generated_at": "2026-04-16 21:39",
-  "total_fetched": 1,
-  "new_count": 1,
+  "generated_at": "2026-04-17 06:48",
+  "total_fetched": 2,
+  "new_count": 2,
   "items": [
     {
-      "filename": "FAS-1-70018937",
-      "date": "20260413",
-      "title": "臺南市大內區公所報廢公務機車三部標售案",
-      "type": "財物變賣公告",
-      "unit": "臺南市大內區公所",
-      "job_number": "115C0002",
-      "url": "https://pcc-api.openfun.app/index/case/3.95.71/115C0002/20260413/FAS-1-70018937"
+      "filename": "PPW-1-70099043",
+      "date": "20260415",
+      "title": "打檔型普通重型機車2輛",
+      "type": "公開徵求廠商提供參考資料公告",
+      "unit": "台灣電力股份有限公司花東供電區營運處",
+      "job_number": "T49520260003",
+      "url": "https://pcc-api.openfun.app/index/case/3.13.31.99/T49520260003/20260415/PPW-1-70099043"
+    },
+    {
+      "filename": "ttd-71194413",
+      "date": "20260414",
+      "title": "115年惠蓀林場打檔機車2台",
+      "type": "公開取得報價單或企劃書公告",
+      "unit": "國立中興大學農業暨自然資源學院實驗林管理處",
+      "job_number": "115-P-04",
+      "url": "https://pcc-api.openfun.app/index/case/3.9.27.2/115-P-04/20260414/ttd-71194413"
     }
   ]
 }
