@@ -124,7 +124,7 @@
   /* ── STAT ROW ── */
   .stat-row {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
     margin-bottom: 28px;
     position: relative; z-index: 1;
@@ -356,6 +356,118 @@
   .t-rel  { background:rgba(255,193,7,.12);  color:#F9A825; }
   .t-trv  { background:rgba(0,188,212,.12);  color:#0097A7; }
 
+  /* ── PCC RADAR ── */
+  .radar-section {
+    margin-top: 24px;
+    position: relative; z-index: 1;
+  }
+  .radar-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .radar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 17px; font-weight: 800; color: var(--midnight);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .radar-chip {
+    font-size: 11px; font-weight: 700; padding: 4px 14px;
+    border-radius: var(--pill-r);
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    color: #fff; box-shadow: 0 4px 10px rgba(78,205,196,.3);
+  }
+  .radar-meta {
+    font-size: 11px; color: var(--muted); letter-spacing: .3px;
+  }
+  .radar-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .radar-card {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 16px 18px;
+    position: relative; overflow: hidden;
+    transition: box-shadow .2s, transform .18s, border-color .2s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .radar-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+    border-radius: var(--card-r) var(--card-r) 0 0;
+  }
+  .radar-card:hover {
+    box-shadow: 0 10px 30px rgba(0,153,204,.10);
+    border-color: rgba(78,205,196,.4);
+    transform: translateY(-3px);
+  }
+  .radar-card-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 8px; margin-bottom: 10px;
+  }
+  .radar-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: var(--pill-r); white-space: nowrap; flex-shrink: 0;
+  }
+  .badge-ev     { background: rgba(78,205,196,.12); color: #0099CC; }
+  .badge-buy    { background: rgba(56,142,60,.12);  color: #388E3C; }
+  .badge-sell   { background: rgba(229,57,53,.10);  color: #E53935; }
+  .badge-survey { background: rgba(255,152,0,.12);  color: #F57C00; }
+  .badge-other  { background: rgba(46,58,89,.10);   color: #2E3A59; }
+  .radar-date {
+    font-size: 11px; color: var(--muted); font-weight: 600; white-space: nowrap;
+  }
+  .radar-card-title {
+    font-size: 13px; font-weight: 700; color: var(--midnight);
+    line-height: 1.5; margin-bottom: 10px;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .radar-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 6px;
+  }
+  .radar-unit {
+    font-size: 11px; color: var(--slate);
+    background: rgba(46,58,89,.07);
+    padding: 2px 9px; border-radius: var(--pill-r);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .radar-link {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    white-space: nowrap;
+    transition: color .2s;
+  }
+  .radar-card:hover .radar-link { color: var(--grad-end); }
+  .radar-summary-bar {
+    display: flex; gap: 20px; align-items: center;
+    background: var(--surface); border-radius: 14px;
+    padding: 12px 20px; margin-bottom: 16px;
+    border: 1.5px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .radar-stat { text-align: center; }
+  .radar-stat-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px; font-weight: 800;
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height: 1;
+  }
+  .radar-stat-label { font-size: 10px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+  .radar-stat-divider { width: 1px; height: 32px; background: var(--border); }
+
+  @media (max-width: 1100px) { .radar-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 640px)  { .radar-grid { grid-template-columns: 1fr; } }
+
   /* ── FOOTER ── */
   .footer {
     margin-top: 28px;
@@ -435,6 +547,12 @@
     <div class="stat-label">品牌關鍵字</div>
     <div class="stat-num zero">0</div>
     <div class="stat-pill pill-empty">本週無新聞</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📡</div>
+    <div class="stat-label">近期標案</div>
+    <div class="stat-num">10</div>
+    <div class="stat-pill pill-active">近 7 天</div>
   </div>
 </div>
 
@@ -933,6 +1051,101 @@
   </div><!-- /right-col -->
 
 </div><!-- /grid-main -->
+
+<!-- ═══════════════ PCC 標案雷達 ═══════════════ -->
+<section class="radar-section">
+
+  <div class="radar-header">
+    <div class="radar-title">
+      📡 政府採購標案雷達
+      <span class="radar-chip">機車 · 電動機車 · 租賃</span>
+    </div>
+    <div class="radar-meta">資料來源：政府電子採購網 &nbsp;·&nbsp; 2026-04-16 更新 &nbsp;·&nbsp; 近 7 天</div>
+  </div>
+
+  <!-- 標案卡片（整張可點擊） -->
+  <div class="radar-grid">
+
+    <!-- 1 -->
+    <a class="radar-card" href="https://pcc-api.openfun.app/index/case/3.13.31.99/T49520260003/20260415/PPW-1-70099043" target="_blank">
+      <div class="radar-card-top">
+        <span class="radar-badge badge-buy">採購</span>
+        <span class="radar-date">2026/04/15</span>
+      </div>
+      <div class="radar-card-title">打檔型普通重型機車2輛</div>
+      <div class="radar-card-footer">
+        <span class="radar-unit">台灣電力花東供電區營運處</span>
+        <span class="radar-link">查看 ›</span>
+      </div>
+    </a>
+
+    <!-- 2 -->
+    <a class="radar-card" href="https://pcc-api.openfun.app/index/case/3.9.27.2/115-P-04/20260414/ttd-71194413" target="_blank">
+      <div class="radar-card-top">
+        <span class="radar-badge badge-buy">採購</span>
+        <span class="radar-date">2026/04/14</span>
+      </div>
+      <div class="radar-card-title">115年惠蓀林場打檔機車2台</div>
+      <div class="radar-card-footer">
+        <span class="radar-unit">國立中興大學農業暨自然資源學院</span>
+        <span class="radar-link">查看 ›</span>
+      </div>
+    </a>
+
+    <!-- 3 -->
+    <a class="radar-card" href="https://pcc-api.openfun.app/index/case/3.95.71/115C0002/20260413/FAS-1-70018937" target="_blank">
+      <div class="radar-card-top">
+        <span class="radar-badge badge-sell">標售</span>
+        <span class="radar-date">2026/04/13</span>
+      </div>
+      <div class="radar-card-title">臺南市大內區公所報廢公務機車三部標售案</div>
+      <div class="radar-card-footer">
+        <span class="radar-unit">臺南市大內區公所</span>
+        <span class="radar-link">查看 ›</span>
+      </div>
+    </a>
+
+    <!-- 4 -->
+    <a class="radar-card" href="https://pcc-api.openfun.app/index/case/A.19.4.7/1150801007/20260410/TIQ-11-70999665" target="_blank">
+      <div class="radar-card-top">
+        <span class="radar-badge badge-buy">採購</span>
+        <span class="radar-date">2026/04/10</span>
+      </div>
+      <div class="radar-card-title">115年保林機車6台採購</div>
+      <div class="radar-card-footer">
+        <span class="radar-unit">農業部林業及自然保育署</span>
+        <span class="radar-link">查看 ›</span>
+      </div>
+    </a>
+
+    <!-- 5 -->
+    <a class="radar-card" href="https://pcc-api.openfun.app/index/case/A.17.2.3/tcnr1140288/20260408/BDM-1-71147988" target="_blank">
+      <div class="radar-card-top">
+        <span class="radar-badge badge-ev">電動機車</span>
+        <span class="radar-date">2026/04/08</span>
+      </div>
+      <div class="radar-card-title">電動機車6台採購案</div>
+      <div class="radar-card-footer">
+        <span class="radar-unit">勞動部勞動力發展署中彰投分署</span>
+        <span class="radar-link">查看 ›</span>
+      </div>
+    </a>
+
+    <!-- 6 -->
+    <a class="radar-card" href="https://pcc-api.openfun.app/index/case/3.87.15/N1150310042/20260407/BDM-1-71146690" target="_blank">
+      <div class="radar-card-top">
+        <span class="radar-badge badge-ev">電動機車租賃</span>
+        <span class="radar-date">2026/04/07</span>
+      </div>
+      <div class="radar-card-title">115年度電動機車電池租賃採購案</div>
+      <div class="radar-card-footer">
+        <span class="radar-unit">臺中市政府環境保護局</span>
+        <span class="radar-link">查看 ›</span>
+      </div>
+    </a>
+
+  </div>
+</section>
 
 <div class="footer">
   資料來源：Google News &nbsp;·&nbsp; Google Trends Taiwan &nbsp;·&nbsp; WebSearch
