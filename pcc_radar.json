@@ -1,25 +1,6 @@
 {
-  "generated_at": "2026-04-20 07:26",
-  "total_fetched": 2,
-  "new_count": 2,
-  "items": [
-    {
-      "filename": "TIQ-11-71003270",
-      "date": "20260417",
-      "title": "連江縣議會公務機車採購案",
-      "type": "公開取得報價單或企劃書公告",
-      "unit": "連江縣議會",
-      "job_number": "1150410",
-      "url": "https://pcc-api.openfun.app/index/case/3.71.76/1150410/20260417/TIQ-11-71003270"
-    },
-    {
-      "filename": "TIQ-11-71004364",
-      "date": "20260417",
-      "title": "115年保林機車4台採購",
-      "type": "公開取得報價單或企劃書公告",
-      "unit": "A.19.4.7",
-      "job_number": "1150801008",
-      "url": "https://pcc-api.openfun.app/index/case/A.19.4.7/1150801008/20260417/TIQ-11-71004364"
-    }
-  ]
+  "generated_at": "2026-05-04 09:55",
+  "total_fetched": 0,
+  "new_count": 0,
+  "items": []
 }
