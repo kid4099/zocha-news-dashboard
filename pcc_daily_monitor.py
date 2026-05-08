@@ -84,7 +84,7 @@ def fetch_recent(days=3):
                     'type': r.get('brief', {}).get('type', ''),
                     'unit': r.get('unit_name', ''),
                     'job_number': r.get('job_number', ''),
-                    'url': f"https://pcc-api.openfun.app{r.get('url', '')}",
+                    'url': (lambda raw: f"https://openfunltd.github.io/pcc-viewer/tender.html?unit_id={raw.split('/')[3]}&job_number={r.get('job_number', '')}" if len(raw.split('/')) > 3 else f"https://openfunltd.github.io/pcc-viewer/")(r.get('url', '')),
                 }
         time.sleep(0.3)
 
