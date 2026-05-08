@@ -1,6 +1,16 @@
 {
-  "generated_at": "2026-05-04 09:55",
-  "total_fetched": 0,
-  "new_count": 0,
-  "items": []
+  "generated_at": "2026-05-08 10:18",
+  "total_fetched": 1,
+  "new_count": 1,
+  "items": [
+    {
+      "filename": "FAS-1-70019179",
+      "date": "20260506",
+      "title": "廢棄公務機車",
+      "type": "財物變賣公告",
+      "unit": "澎湖縣七美鄉公所",
+      "job_number": "114-09-30B",
+      "url": "https://pcc-api.openfun.app/index/case/3.76.56.56/114-09-30B/20260506/FAS-1-70019179"
+    }
+  ]
 }
